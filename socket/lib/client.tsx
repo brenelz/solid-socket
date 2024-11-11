@@ -164,6 +164,7 @@ export function createEndpoint(
         name: `input`,
         scope: inputScope,
         initial: untrack(input),
+        writable: !!input.writable
       })
       : input;
   // console.log({ serializedInput });

@@ -36,7 +36,7 @@ export class LiveSolidServer {
   private closures = new Map<string, { payload: any; disposal: () => void }>();
   observers = new Map<string, Function>();
 
-  constructor(public peer: SimplePeer) {}
+  constructor(public peer: SimplePeer) { }
 
   send<T>(message: WsMessage<WsMessageDown<T>>) {
     // console.log(`send`, message);
@@ -109,12 +109,12 @@ export class LiveSolidServer {
           [name]:
             typeof value === "function"
               ? // @ts-expect-error
-                value.type === "memo"
+              value.type === "memo"
                 ? createSeriazliedMemo({
-                    name,
-                    scope: id,
-                    initial: untrack(() => value()),
-                  })
+                  name,
+                  scope: id,
+                  initial: untrack(() => value()),
+                })
                 : createSeriazliedRef({ name, scope: id })
               : value,
         };
@@ -162,7 +162,7 @@ export class LiveSolidServer {
     this.closures.set(id, { payload: sub, disposal: () => sub.unsubscribe() });
   }
 
-  stream<O>(stream: SerializedStream<O>) {}
+  stream<O>(stream: SerializedStream<O>) { }
 
   cleanup() {
     for (const [key, closure] of this.closures.entries()) {
@@ -227,8 +227,13 @@ export function createSocketMemoConsumer<O>(
     server.observers.set(inputSubId, set);
     server.send({ type: "subscribe", id: inputSubId, ref });
     onCleanup(() => server.observers.delete(inputSubId));
-    return get;
+    return [get, set];
   });
 
-  return () => memo()();
+  if (ref.writable) {
+    return () => [memo()[0], memo()[1]];
+  }
+
+  return () => memo()[0]();
+
 }
