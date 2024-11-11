@@ -2,36 +2,36 @@ export type WsMessage<T> = T & { id: string };
 
 export type WsMessageUp<I = any> =
   | {
-      type: "create";
-      name: string;
-      input?: I;
-    }
+    type: "create";
+    name: string;
+    input?: I;
+  }
   | {
-      type: "subscribe";
-      ref: SerializedMemo;
-    }
+    type: "subscribe";
+    ref: SerializedMemo;
+  }
   | {
-      type: "dispose";
-    }
+    type: "dispose";
+  }
   | {
-      type: "invoke";
-      ref: SerializedRef;
-      input?: I;
-    }
+    type: "invoke";
+    ref: SerializedRef;
+    input?: I;
+  }
   | {
-      type: "value";
-      value: I;
-    };
+    type: "value";
+    value: I;
+  };
 
 export type WsMessageDown<T> =
   | {
-      type: "value";
-      value: T;
-    }
+    type: "value";
+    value: T;
+  }
   | {
-      type: "subscribe";
-      ref: SerializedMemo;
-    };
+    type: "subscribe";
+    ref: SerializedMemo;
+  };
 
 export type SerializedRef<I = any, O = any> = {
   __type: "ref";
@@ -44,6 +44,7 @@ export type SerializedMemo<O = any> = {
   name: string;
   scope: string;
   initial: O;
+  writable: boolean;
 };
 
 export type SerializedThing = SerializedRef | SerializedMemo;
@@ -64,5 +65,13 @@ export function createSeriazliedMemo(
 export function createSocketMemo<T>(source: () => T): () => T | undefined {
   // @ts-expect-error
   source.type = "memo";
+  return source;
+}
+
+export function createWritableSignal<T>(source: () => T): () => T | undefined {
+  // @ts-expect-error
+  source.type = "memo";
+  // @ts-expect-error
+  source.writable = true;
   return source;
 }
